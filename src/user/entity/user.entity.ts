@@ -16,6 +16,8 @@ export class User {
   email: string;
   @Column()
   password: string;
+  @Column({ nullable: true })
+  refreshToken: string;
   @CreateDateColumn()
   createdAt: Date;
 }
