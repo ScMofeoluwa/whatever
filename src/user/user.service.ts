@@ -25,7 +25,7 @@ export class UserService {
     return await this.userRepository.findOneBy({ username: username });
   }
   async create(data: CreateUserDto) {
-    const newUser = await this.userRepository.create(data);
+    const newUser = this.userRepository.create(data);
     return this.userRepository.save(newUser);
   }
   async update(userId: number, data: UpdateUserDto) {

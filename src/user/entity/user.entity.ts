@@ -1,7 +1,9 @@
+import { Event } from '../../events/entity/event.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -20,4 +22,9 @@ export class User {
   refreshToken: string;
   @CreateDateColumn()
   createdAt: Date;
+  @OneToMany(() => Event, (event) => event.user, {
+    cascade: true,
+    nullable: true,
+  })
+  events: Event[];
 }
