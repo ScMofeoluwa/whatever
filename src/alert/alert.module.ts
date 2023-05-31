@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AlertService } from './alert.service';
 import { BullModule } from '@nestjs/bull';
-import { EventsService } from 'src/events/events.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AlertProcessor } from './alert.processor';
 import { ConfigModule, ConfigService } from '@nestjs/config';

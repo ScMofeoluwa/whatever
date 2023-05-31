@@ -3,7 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../database/entities/event.entity';
 import { Repository } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto.ts';
-import { Notification, NotificationTime } from '../database/entities/notification.entity';
+import {
+  Notification,
+  NotificationTime,
+} from '../database/entities/notification.entity';
 import { UserService } from 'src/user/user.service';
 import { UpdateEventDto } from './dto/update-event.dto.ts';
 
