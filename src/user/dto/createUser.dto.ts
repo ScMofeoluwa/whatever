@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Event } from 'src/events/entity/event.entity';
+import { Event } from 'src/database/entities/event.entity';
 
 export class CreateUserDto {
   @IsNotEmpty()

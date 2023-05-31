@@ -1,4 +1,4 @@
-import { Event } from '../../events/entity/event.entity';
+import { Event } from './event.entity';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-//User entity
+//User entities
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

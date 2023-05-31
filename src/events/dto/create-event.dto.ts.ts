@@ -8,7 +8,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { NotificationTime } from '../entity/notification.entity';
+import { NotificationTime } from '../../database/entities/notification.entity';
 
 export class CreateEventDto {
   @IsNotEmpty()

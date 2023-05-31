@@ -8,6 +8,7 @@ import { BullModule } from '@nestjs/bull';
 import { AlertModule } from './alert/alert.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from './task/task.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -34,13 +35,14 @@ import { TaskModule } from './task/task.module';
       useFactory: (config: ConfigService) => ({
         redis: {
           host: config.get('REDIS_HOST'),
-          port: config.get('REDIS_PORT'),
+          port: config.get<number>('REDIS_PORT'),
         },
       }),
     }),
     AlertModule,
     ScheduleModule.forRoot(),
     TaskModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [],

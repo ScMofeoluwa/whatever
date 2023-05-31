@@ -8,7 +8,7 @@
   "scripts": {
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "typeorm:run-migrations": "npm run typeorm migration:run -- -d ./typeOrm.config.ts",
-    "typeorm:generate-migration": "npm run typeorm -- -d ./typeOrm.config.ts migration:generate ./migrations/$npm_config_name",
+    "typeorm:generate-migration": "npm run typeorm -- -d ./typeOrm.config.ts migration:generate src/database/migrations/$npm_config_name",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
