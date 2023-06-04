@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Event } from './entities/event.entity';
-import { User } from './entities/user.entity';
-import { Notification } from './entities/notification.entity';
+import { User, Event, Notification } from './entities';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Event, User, Notification])],

@@ -9,11 +9,9 @@ import {
   Length,
 } from 'class-validator';
 import { NotificationTime } from '../../database/entities/notification.entity';
+import { NoNotificationTimeIfNotAllowed } from './notification-decorator';
 
 export class CreateEventDto {
-  @IsNotEmpty()
-  @IsInt()
-  user: number;
   @IsNotEmpty()
   @IsString()
   @IsNotEmpty()
@@ -33,6 +31,7 @@ export class CreateEventDto {
   @IsBoolean()
   allowNotification: boolean;
   @IsOptional()
+  @NoNotificationTimeIfNotAllowed()
   @IsInt()
   @IsIn([1800, 3600])
   notificationReminderTime: NotificationTime;

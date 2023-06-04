@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Event } from '../database/entities/event.entity';
-import { Repository } from 'typeorm';
-import { CreateEventDto } from './dto/create-event.dto.ts';
+import { Event } from '../database/entities';
+import { EntityNotFoundError, Repository } from 'typeorm';
+import { CreateEventDto, UpdateEventDto } from './dto';
 import {
   Notification,
   NotificationTime,
 } from '../database/entities/notification.entity';
 import { UserService } from 'src/user/user.service';
-import { UpdateEventDto } from './dto/update-event.dto.ts';
 
 @Injectable()
 export class EventsService {
@@ -20,71 +19,81 @@ export class EventsService {
     private readonly userService: UserService,
   ) {}
 
-  async get(id: number) {
-    return this.eventRepository.findOne({ where: { id: id } });
+  async get(user, id: number) {
+    const event = await this.eventRepository.findOne({
+      where: { id: id, user: { id: user } },
+    });
+    if (!event) {
+      throw new EntityNotFoundError(Event, { id: id });
+    }
+    return event;
   }
 
-  async create(data: CreateEventDto) {
-    const { user, notificationReminderTime, ...eventData } = data;
-    let notification = null;
-    if (eventData.allowNotification && notificationReminderTime) {
-      notification = this.createNotification(notificationReminderTime);
-    }
+  async create(user: number, data: CreateEventDto) {
+    const { allowNotification, notificationReminderTime, ...eventData } = data;
     const existingUser = await this.userService.findOne(user);
-    const event = this.eventRepository.create({
+    let event = this.eventRepository.create({
       user: existingUser,
+      allowNotification,
       ...eventData,
-      notification: notification,
     });
-    return this.eventRepository.save(event);
+    if (allowNotification) {
+      event.notification = await this.createNotification(
+        notificationReminderTime,
+      );
+    }
+    event = await this.eventRepository.save(event);
+    return this.get(user, event.id);
   }
 
   //change notification time
   //switch off notification
-  async update(data: UpdateEventDto) {
+  async update(user: number, data: UpdateEventDto) {
     const { id, notificationReminderTime, ...updateEventInfo } = data;
     const event = await this.eventRepository.findOne({
-      where: { id: id },
-      relations: ['notification', 'user'],
+      where: { id: id, user: { id: user } },
+      relations: ['notification'],
     });
-    let eventNotification = event.notification;
+    if (!event) {
+      throw new EntityNotFoundError(Event, { id: id });
+    }
+    const eventNotification = event.notification;
     //throw error if we try to update notification if it has already been executed
-    if (
-      eventNotification.executed &&
-      updateEventInfo.allowNotification != null &&
-      notificationReminderTime != null
-    ) {
+    if (eventNotification.executed) {
       throw new Error('Notification already executed');
     }
     //if update data disables notification while notification already exists
     if (updateEventInfo.allowNotification == false && eventNotification) {
-      await this.notificationRepository.remove(eventNotification);
-      eventNotification = null;
+      const eventNotificationId = eventNotification.id;
+      event.notification = null;
+      await this.eventRepository.save(event);
+      await this.notificationRepository.delete(eventNotificationId);
     }
     //update notification if only there is a change in the time
-    if (notificationReminderTime && updateEventInfo.allowNotification) {
-      const { reminderTime, ...otherNotificationData } = eventNotification;
-      eventNotification = await this.notificationRepository.preload({
-        ...otherNotificationData,
+    if (notificationReminderTime !== eventNotification.reminderTime) {
+      await this.notificationRepository.update(eventNotification.id, {
         reminderTime: notificationReminderTime,
       });
     }
-    return this.eventRepository.preload({
+    await this.eventRepository.preload({
       id: id,
       ...updateEventInfo,
-      user: event.user,
       notification: eventNotification,
     });
+    return this.get(user, event.id);
   }
 
-  async delete(data: UpdateEventDto) {
-    const { id } = data;
+  async delete(user: number, id: number) {
     const event = await this.eventRepository.findOne({
-      where: { id: id },
+      where: { id: id, user: { id: user } },
       relations: ['notification', 'user'],
     });
-    await this.notificationRepository.remove(event.notification);
-    return this.eventRepository.remove(event);
+    if (!event) {
+      throw new EntityNotFoundError(Event, { id: id });
+    }
+    const eventNotificationId = event.notification.id;
+    await this.eventRepository.delete(event.id);
+    return this.notificationRepository.delete(eventNotificationId);
   }
 
   createNotification(reminderTime: NotificationTime) {

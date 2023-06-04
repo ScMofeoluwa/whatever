@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, HttpStatus } from '@nestjs/common';
 import { AuthDto } from './dto';
 import { CreateUserDto } from '../user/dto';
 import { genSalt, hash, compare } from 'bcrypt';
@@ -43,6 +43,10 @@ export class AuthService {
 
   async logout(userId: number) {
     await this.userService.update(userId, { refreshToken: null });
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'user has been successfully logged out.',
+    };
   }
 
   async generateTokens(userId: number) {
