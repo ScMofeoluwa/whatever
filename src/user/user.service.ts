@@ -19,11 +19,7 @@ export class UserService {
     return user;
   }
   async findByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email: email } });
-    if (!user) {
-      throw new EntityNotFoundError(User, { email: email });
-    }
-    return user;
+    return this.userRepository.findOne({ where: { email: email } });
   }
   async findByUsername(username: string) {
     const user = await this.userRepository.findOneBy({ username: username });
