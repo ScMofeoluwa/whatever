@@ -9,6 +9,7 @@ import { AlertModule } from './alert/alert.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskModule } from './task/task.module';
 import { DatabaseModule } from './database/database.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -36,6 +37,19 @@ import { DatabaseModule } from './database/database.module';
         redis: {
           host: config.get('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT'),
+        },
+      }),
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          auth: {
+            user: config.get('MAIL_USER'),
+            password: config.get('MAIL_PASS'),
+          },
         },
       }),
     }),
