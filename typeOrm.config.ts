@@ -13,6 +13,6 @@ export default new DataSource({
   username: configService.get('POSTGRES_USER'),
   password: configService.get('POSTGRES_PASSWORD'),
   database: configService.get('POSTGRES_DB'),
-  entities: ['src/**/*.entities.ts'],
-  migrations: ['migrations/*.ts'],
+  entities: ['src/database/entities/*.entity.ts'],
+  migrations: ['src/database/migrations/*.ts'],
 });
