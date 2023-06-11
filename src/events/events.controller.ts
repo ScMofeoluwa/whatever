@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UseFilters,
   Request,
   Param,
   Patch,
@@ -15,7 +14,6 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto';
 import { AtGuard } from '../auth/common/guards';
-import { EntityNotFoundExceptionFilter } from '../filters';
 
 @Controller('events')
 export class EventsController {
@@ -24,7 +22,6 @@ export class EventsController {
   @UseGuards(AtGuard)
   @Get('/:id')
   @HttpCode(HttpStatus.FOUND)
-  @UseFilters(new EntityNotFoundExceptionFilter())
   async getEvent(@Param('id') id: number, @Request() req) {
     return this.eventService.get(req.user.id, id);
   }
@@ -39,15 +36,13 @@ export class EventsController {
   @UseGuards(AtGuard)
   @Patch('/:id')
   @HttpCode(HttpStatus.OK)
-  @UseFilters(new EntityNotFoundExceptionFilter())
   update(@Param('id') id: number, @Body() dto: CreateEventDto, @Request() req) {
     return this.eventService.update(req.user.id, { ...dto, id: id });
   }
 
   @UseGuards(AtGuard)
   @Delete('/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseFilters(new EntityNotFoundExceptionFilter())
+  @HttpCode(HttpStatus.OK)
   delete(@Param('id') id: number, @Request() req) {
     return this.eventService.delete(req.user.id, id);
   }

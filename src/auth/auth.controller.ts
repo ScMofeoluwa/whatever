@@ -5,7 +5,6 @@ import {
   HttpStatus,
   HttpCode,
   UseGuards,
-  UseFilters,
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -13,7 +12,6 @@ import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { CreateUserDto } from '../user/dto';
 import { AtGuard, RtGuard } from './common/guards';
-import { EntityNotFoundExceptionFilter } from '../filters';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +24,6 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UseFilters(new EntityNotFoundExceptionFilter())
   login(@Body() dto: AuthDto) {
     return this.authService.login(dto);
   }

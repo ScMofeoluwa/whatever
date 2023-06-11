@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../database/entities';
-import { EntityNotFoundError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateEventDto, UpdateEventDto } from './dto';
 import {
   Notification,
@@ -24,7 +28,7 @@ export class EventsService {
       where: { id: id, user: { id: user } },
     });
     if (!event) {
-      throw new EntityNotFoundError(Event, { id: id });
+      throw new NotFoundException(`Event with id: ${id} not found`);
     }
     return event;
   }
@@ -55,12 +59,12 @@ export class EventsService {
       relations: ['notification'],
     });
     if (!event) {
-      throw new EntityNotFoundError(Event, { id: id });
+      throw new NotFoundException(`Event with id: ${id} not found`);
     }
     const eventNotification = event.notification;
     //throw error if we try to update notification if it has already been executed
     if (eventNotification.executed) {
-      throw new Error('Notification already executed');
+      throw new ConflictException('Notification already executed');
     }
     //if update data disables notification while notification already exists
     if (updateEventInfo.allowNotification == false && eventNotification) {
@@ -89,11 +93,12 @@ export class EventsService {
       relations: ['notification', 'user'],
     });
     if (!event) {
-      throw new EntityNotFoundError(Event, { id: id });
+      throw new NotFoundException(`Event with id: ${id} not found`);
     }
     const eventNotificationId = event.notification.id;
     await this.eventRepository.delete(event.id);
-    return this.notificationRepository.delete(eventNotificationId);
+    await this.notificationRepository.delete(eventNotificationId);
+    return { message: 'event successfully deleted' };
   }
 
   createNotification(reminderTime: NotificationTime) {
@@ -106,15 +111,14 @@ export class EventsService {
   updateNotificationExecutedStatus(id: number) {
     return this.notificationRepository.update(id, {
       executed: true,
-      dateExecuted: Date.now(),
+      dateExecuted: new Date(Date.now()),
     });
   }
 
   async getEventsWithActiveNotification() {
-    const allEvents = await this.eventRepository.find({
-      where: { allowNotification: true },
+    return await this.eventRepository.find({
+      where: { allowNotification: true, notification: { executed: false } },
       relations: ['notification', 'user'],
     });
-    return allEvents.filter((event) => event.notification.executed == false); //return only active notification
   }
 }
