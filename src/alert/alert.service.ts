@@ -11,22 +11,27 @@ export class AlertService {
   ) {}
 
   async addNotificationsToQueue() {
-    console.log('Added to queue');
     const eventsWithActiveAlerts =
       await this.eventService.getEventsWithActiveNotification();
     await Promise.all(
       eventsWithActiveAlerts.map(async (event) => {
-        if (
-          event.startTime.getTime() + event.notification.reminderTime * 1000 >=
-          Date.now()
-        ) {
-          await this.alertQueue.add({
-            recipient: event.user.email,
-            title: 'Event Reminder',
-            message: `Your event meeting scheduled for ${event.startTime.toISOString()} starts in ${
-              event.notification.reminderTime
-            } minutes.`,
-          });
+        const reminderTimeInMillisecs = event.notification.reminderTime * 1000;
+        const currentTime = Date.now();
+        const eventStartTime = event.startTime.getTime();
+
+        if (currentTime + reminderTimeInMillisecs <= eventStartTime) {
+          const delay = eventStartTime - reminderTimeInMillisecs - currentTime;
+          await this.alertQueue.add(
+            {
+              recipient: event.user.email,
+              title: 'Event Reminder',
+              message: `Your event meeting scheduled for ${event.startTime.toISOString()} starts in ${
+                event.notification.reminderTime / 60
+              } minutes.`,
+            },
+            { delay: delay },
+          );
+          console.log('Added to queue');
           await this.eventService.updateNotificationExecutedStatus(
             event.notification.id,
           );
