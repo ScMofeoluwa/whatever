@@ -17,12 +17,12 @@ export class AuthService {
 
   async signup(data: CreateUserDto) {
     data.password = await this.hashPassword(data.password);
-    const { password, ...user } = await this.userService.create(data);
-    return user;
+    await this.userService.create(data);
+    return { message: 'account successfully created' };
   }
 
   async login(data: AuthDto): Promise<AuthToken> {
-    const user = await this.userService.findByUsername(data.username);
+    const user = await this.userService.verifyUsername(data.username);
     if (!user) throw new ForbiddenException('Access Denied');
     const valid = await this.isValid(data.password, user.password);
     if (!valid) throw new ForbiddenException('Access Denied');
