@@ -36,7 +36,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
       useFactory: (config: ConfigService) => ({
         redis: {
           host: config.get('REDIS_HOST'),
-          port: config.get<number>('REDIS_PORT'),
+          port: config.get('REDIS_PORT'),
+          password: config.get('REDIS_PASSWORD'),
         },
       }),
     }),
@@ -45,10 +46,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         transport: {
-          host: config.get('MAIL_HOST'),
+          service: config.get('MAIL_SERVICE'),
           auth: {
             user: config.get('MAIL_USER'),
-            password: config.get('MAIL_PASS'),
+            pass: config.get('MAIL_PASS'),
           },
         },
       }),
